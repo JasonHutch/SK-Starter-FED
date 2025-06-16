@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Plus, MessageSquare, Trash2, Edit3, X, Check } from 'lucide-react';
 import {
@@ -68,82 +69,80 @@ export function ChatSidebar() {
             <SidebarMenu className="space-y-1">
               {chats.map((chat) => (
                 <SidebarMenuItem key={chat.id}>
-                  <div className={cn(
-                    "flex items-center w-full transition-colors group",
-                    activeChat?.id === chat.id 
-                      ? "bg-blue-50" 
-                      : "hover:bg-gray-100"
-                  )}>
-                    {editingChatId === chat.id ? (
-                      <div className="flex items-center flex-1 min-w-0 p-2 rounded-lg group-data-[collapsible=icon]:hidden">
-                        <MessageSquare className="mr-3 h-4 w-4 text-gray-500 flex-shrink-0" />
-                        <Input
-                          value={editingName}
-                          onChange={(e) => setEditingName(e.target.value)}
-                          className="h-6 text-sm border-0 p-0 focus:ring-0 bg-transparent flex-1"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleSaveEdit();
-                            if (e.key === 'Escape') handleCancelEdit();
-                          }}
-                          autoFocus
-                        />
-                        <div className="flex ml-2 space-x-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={handleSaveEdit}
-                            className="h-6 w-6 p-0"
-                          >
-                            <Check className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={handleCancelEdit}
-                            className="h-6 w-6 p-0"
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
+                  {editingChatId === chat.id ? (
+                    <div className="flex items-center w-full p-2 rounded-lg group-data-[collapsible=icon]:hidden">
+                      <MessageSquare className="mr-3 h-4 w-4 text-gray-500 flex-shrink-0" />
+                      <Input
+                        value={editingName}
+                        onChange={(e) => setEditingName(e.target.value)}
+                        className="h-6 text-sm border-0 p-0 focus:ring-0 bg-transparent flex-1"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSaveEdit();
+                          if (e.key === 'Escape') handleCancelEdit();
+                        }}
+                        autoFocus
+                      />
+                      <div className="flex ml-2 space-x-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={handleSaveEdit}
+                          className="h-6 w-6 p-0"
+                        >
+                          <Check className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={handleCancelEdit}
+                          className="h-6 w-6 p-0"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
                       </div>
-                    ) : (
+                    </div>
+                  ) : (
+                    <div className={cn(
+                      "flex items-center w-full transition-colors group rounded-lg",
+                      activeChat?.id === chat.id 
+                        ? "bg-blue-50" 
+                        : "hover:bg-gray-100"
+                    )}>
                       <SidebarMenuButton
-                        asChild
+                        onClick={() => setActiveChat(chat)}
                         isActive={activeChat?.id === chat.id}
                         tooltip={chat.name}
-                        className="w-full justify-start"
+                        className="w-full justify-start flex-1"
                       >
-                        <button onClick={() => setActiveChat(chat)} className="flex items-center w-full">
-                          <MessageSquare className="h-4 w-4 flex-shrink-0" />
-                          <span className="ml-3 truncate group-data-[collapsible=icon]:hidden">{chat.name}</span>
-                          <div className="opacity-0 group-hover:opacity-100 flex ml-auto space-x-1 transition-opacity group-data-[collapsible=icon]:hidden">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleStartEdit(chat.id, chat.name);
-                              }}
-                              className="h-6 w-6 p-0 hover:bg-gray-200"
-                            >
-                              <Edit3 className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                deleteChat(chat.id);
-                              }}
-                              className="h-6 w-6 p-0 hover:bg-red-100 hover:text-red-600"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </button>
+                        <MessageSquare className="h-4 w-4 flex-shrink-0" />
+                        <span className="ml-3 truncate group-data-[collapsible=icon]:hidden">{chat.name}</span>
                       </SidebarMenuButton>
-                    )}
-                  </div>
+                      <div className="opacity-0 group-hover:opacity-100 flex ml-2 mr-2 space-x-1 transition-opacity group-data-[collapsible=icon]:hidden">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStartEdit(chat.id, chat.name);
+                          }}
+                          className="h-6 w-6 p-0 hover:bg-gray-200"
+                        >
+                          <Edit3 className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteChat(chat.id);
+                          }}
+                          className="h-6 w-6 p-0 hover:bg-red-100 hover:text-red-600"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
