@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Plus, MessageSquare, Trash2, Edit3, X, Check } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, Edit3, X, Check, PanelLeft } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -21,6 +22,8 @@ export function ChatSidebar() {
   const { state } = useSidebar();
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
+
+  console.log('ChatSidebar render - sidebar state:', state);
 
   const handleStartEdit = (chatId: string, currentName: string) => {
     setEditingChatId(chatId);
@@ -50,7 +53,20 @@ export function ChatSidebar() {
           </>
         ) : (
           <div className="flex items-center justify-center w-full">
-            <SidebarTrigger className="h-8 w-8" />
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="h-8 w-8 border border-gray-300 bg-white hover:bg-gray-100"
+              onClick={() => {
+                console.log('Manual expand button clicked');
+                // We'll use the SidebarTrigger's functionality
+                document.querySelector('[data-sidebar="trigger"]')?.click();
+              }}
+            >
+              <PanelLeft className="h-4 w-4" />
+            </Button>
+            {/* Hidden SidebarTrigger for functionality */}
+            <SidebarTrigger className="hidden" />
           </div>
         )}
       </div>
