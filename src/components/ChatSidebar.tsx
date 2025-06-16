@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, MessageSquare, Trash2, Edit3, X, Check, Menu } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, Edit3, X, Check } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -50,9 +50,7 @@ export function ChatSidebar() {
           </>
         ) : (
           <div className="flex items-center justify-center w-full">
-            <SidebarTrigger className="h-8 w-8">
-              <Menu className="h-4 w-4" />
-            </SidebarTrigger>
+            <SidebarTrigger className="h-8 w-8" />
           </div>
         )}
       </div>
