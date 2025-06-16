@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, MessageSquare, Trash2, Edit3, X, Check } from 'lucide-react';
 import {
@@ -15,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useChat } from "@/contexts/ChatContext";
+import { LearningProfile } from "@/components/LearningProfile";
 import { cn } from "@/lib/utils";
 
 export function ChatSidebar() {
@@ -58,6 +58,11 @@ export function ChatSidebar() {
             <Plus className="h-4 w-4 group-data-[collapsible=icon]:mr-0 mr-2" />
             <span className="group-data-[collapsible=icon]:hidden">New Chat</span>
           </Button>
+        </div>
+
+        {/* Learning Profile Section */}
+        <div className="mb-4">
+          <LearningProfile />
         </div>
 
         {/* Chat List */}
