@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -99,35 +100,36 @@ export function ChatInterface() {
                 : "bg-gray-100 text-gray-900"
             )}>
               {message.role === 'assistant' ? (
-                <ReactMarkdown 
-                  className="prose prose-sm max-w-none"
-                  components={{
-                    code: ({ className, children, ...props }) => (
-                      <code
-                        className={cn(
-                          "bg-gray-200 px-1 py-0.5 rounded text-xs font-mono",
-                          className
-                        )}
-                        {...props}
-                      >
-                        {children}
-                      </code>
-                    ),
-                    pre: ({ className, children, ...props }) => (
-                      <pre
-                        className={cn(
-                          "bg-gray-800 text-gray-100 p-3 rounded-md overflow-x-auto text-xs",
-                          className
-                        )}
-                        {...props}
-                      >
-                        {children}
-                      </pre>
-                    )
-                  }}
-                >
-                  {message.content}
-                </ReactMarkdown>
+                <div className="prose prose-sm max-w-none">
+                  <ReactMarkdown 
+                    components={{
+                      code: ({ className, children, ...props }) => (
+                        <code
+                          className={cn(
+                            "bg-gray-200 px-1 py-0.5 rounded text-xs font-mono",
+                            className
+                          )}
+                          {...props}
+                        >
+                          {children}
+                        </code>
+                      ),
+                      pre: ({ className, children, ...props }) => (
+                        <pre
+                          className={cn(
+                            "bg-gray-800 text-gray-100 p-3 rounded-md overflow-x-auto text-xs",
+                            className
+                          )}
+                          {...props}
+                        >
+                          {children}
+                        </pre>
+                      )
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                </div>
               ) : (
                 <p className="whitespace-pre-wrap">{message.content}</p>
               )}
