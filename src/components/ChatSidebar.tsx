@@ -60,7 +60,8 @@ export function ChatSidebar() {
               onClick={() => {
                 console.log('Manual expand button clicked');
                 // We'll use the SidebarTrigger's functionality
-                document.querySelector('[data-sidebar="trigger"]')?.click();
+                const trigger = document.querySelector('[data-sidebar="trigger"]') as HTMLElement;
+                trigger?.click();
               }}
             >
               <PanelLeft className="h-4 w-4" />
