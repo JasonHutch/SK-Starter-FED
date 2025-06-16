@@ -1,10 +1,10 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useChat } from "@/contexts/ChatContext";
 import { cn } from "@/lib/utils";
+import ReactMarkdown from 'react-markdown';
 
 export function ChatInterface() {
   const { activeChat, addMessage } = useChat();
@@ -98,7 +98,39 @@ export function ChatInterface() {
                 ? "bg-blue-600 text-white" 
                 : "bg-gray-100 text-gray-900"
             )}>
-              <p className="whitespace-pre-wrap">{message.content}</p>
+              {message.role === 'assistant' ? (
+                <ReactMarkdown 
+                  className="prose prose-sm max-w-none"
+                  components={{
+                    code: ({ className, children, ...props }) => (
+                      <code
+                        className={cn(
+                          "bg-gray-200 px-1 py-0.5 rounded text-xs font-mono",
+                          className
+                        )}
+                        {...props}
+                      >
+                        {children}
+                      </code>
+                    ),
+                    pre: ({ className, children, ...props }) => (
+                      <pre
+                        className={cn(
+                          "bg-gray-800 text-gray-100 p-3 rounded-md overflow-x-auto text-xs",
+                          className
+                        )}
+                        {...props}
+                      >
+                        {children}
+                      </pre>
+                    )
+                  }}
+                >
+                  {message.content}
+                </ReactMarkdown>
+              ) : (
+                <p className="whitespace-pre-wrap">{message.content}</p>
+              )}
               <p className={cn(
                 "text-xs mt-1 opacity-70",
                 message.role === 'user' ? "text-blue-100" : "text-gray-500"
