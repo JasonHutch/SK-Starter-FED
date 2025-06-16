@@ -14,7 +14,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useChat } from "@/contexts/ChatContext";
-import { LearningProfile } from "@/components/LearningProfile";
 import { cn } from "@/lib/utils";
 
 export function ChatSidebar() {
@@ -44,7 +43,7 @@ export function ChatSidebar() {
     <Sidebar collapsible="icon" className="bg-white border-r border-gray-200">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900 group-data-[collapsible=icon]:hidden">AI Chat</h2>
+        <h2 className="text-lg font-semibold text-gray-900 group-data-[collapsible=icon]:hidden">Chats</h2>
         <SidebarTrigger className="ml-auto" />
       </div>
       
@@ -58,11 +57,6 @@ export function ChatSidebar() {
             <Plus className="h-4 w-4 group-data-[collapsible=icon]:mr-0 mr-2" />
             <span className="group-data-[collapsible=icon]:hidden">New Chat</span>
           </Button>
-        </div>
-
-        {/* Learning Profile Section */}
-        <div className="mb-4">
-          <LearningProfile />
         </div>
 
         {/* Chat List */}
