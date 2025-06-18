@@ -1,17 +1,72 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User } from 'lucide-react';
+import { Send, Bot, User, Wifi, WifiOff } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useChat } from "@/contexts/ChatContext";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from 'react-markdown';
+import { useSignalR } from '@/hooks/useSignalR';
 
 export function ChatInterface() {
   const { activeChat, addMessage } = useChat();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [streamingMessage, setStreamingMessage] = useState<string>('');
+  const [isStreaming, setIsStreaming] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // SignalR integration
+  const {
+    isConnected,
+    isConnecting,
+    error: signalRError,
+    sendMessage: sendSignalRMessage,
+    joinSession,
+    leaveSession,
+  } = useSignalR({
+    autoConnect: true,
+    onStreamingStarted: () => {
+      console.log('📧 Streaming started');
+      setIsStreaming(true);
+      setStreamingMessage('');
+    },
+    onStreamingChunk: (chunk) => {
+      console.log('📧 Streaming chunk:', chunk);
+      setStreamingMessage(prev => prev + chunk);
+    },
+    onStreamingCompleted: () => {
+      console.log('📧 Streaming completed');
+      setIsStreaming(false);
+      // Add the final streaming message to chat history
+      if (streamingMessage) {
+        addMessage({
+          content: streamingMessage,
+          role: 'assistant'
+        });
+        setStreamingMessage('');
+      }
+      setIsLoading(false);
+    },
+    onToolCall: (data) => {
+      // Handle tool call - show intermediate step
+      console.log('📧 onToolCall received:', data);
+      addMessage({
+        content: `🔧 Using ${data.tool}: ${data.input}`,
+        role: 'assistant'
+      });
+    },
+    onFinalResponse: (response) => {
+      // Handle final response from the AI (fallback for non-streaming)
+      console.log('📧 onFinalResponse received:', response);
+      if (!isStreaming) {
+        addMessage({
+          content: response,
+          role: 'assistant'
+        });
+      }
+      setIsLoading(false);
+    }
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -20,6 +75,17 @@ export function ChatInterface() {
   useEffect(() => {
     scrollToBottom();
   }, [activeChat?.messages]);
+
+  // Join/leave session when activeChat changes
+  useEffect(() => {
+    if (activeChat && isConnected) {
+      joinSession(activeChat.id).catch(console.error);
+      
+      return () => {
+        leaveSession(activeChat.id).catch(console.error);
+      };
+    }
+  }, [activeChat, isConnected, joinSession, leaveSession]);
 
   const handleSend = async () => {
     if (!input.trim() || !activeChat || isLoading) return;
@@ -31,15 +97,29 @@ export function ChatInterface() {
     // Add user message
     addMessage({ content: userMessage, role: 'user' });
 
-    // TODO: Replace with actual SignalR communication
-    // Simulate AI response for now
-    setTimeout(() => {
+    try {
+      if (isConnected) {
+        // Send message via SignalR
+        await sendSignalRMessage(userMessage, activeChat.id);
+      } else {
+        // Fallback: Show connection error and simulate response
+        console.warn('SignalR not connected, using fallback');
+        setTimeout(() => {
+          addMessage({ 
+            content: "⚠️ SignalR connection not available. Please check your connection to the C# backend server.", 
+            role: 'assistant' 
+          });
+          setIsLoading(false);
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Failed to send message:', error);
       addMessage({ 
-        content: "I'm a placeholder response. Connect your SignalR hub here to communicate with your C# Semantic Kernel agents.", 
+        content: "❌ Failed to send message. Please try again.", 
         role: 'assistant' 
       });
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -69,10 +149,57 @@ export function ChatInterface() {
     <div className="flex-1 flex flex-col bg-white">
       {/* Chat Header */}
       <div className="border-b border-gray-200 p-4">
-        <h1 className="text-lg font-semibold text-gray-900">{activeChat.name}</h1>
-        <p className="text-sm text-gray-500">
-          {activeChat.messages.length} messages
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-lg font-semibold text-gray-900">{activeChat.name}</h1>
+            <p className="text-sm text-gray-500">
+              {activeChat.messages.length} messages
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            {/* SignalR Connection Status */}
+            <div className={cn(
+              "flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium",
+              isConnected 
+                ? "bg-green-100 text-green-800" 
+                : isConnecting 
+                ? "bg-yellow-100 text-yellow-800"
+                : "bg-red-100 text-red-800"
+            )}>
+              {isConnected ? (
+                <>
+                  <Wifi className="w-3 h-3" />
+                  <span>Connected</span>
+                </>
+              ) : isConnecting ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-yellow-600 border-t-transparent rounded-full animate-spin" />
+                  <span>Connecting</span>
+                </>
+              ) : (
+                <>
+                  <WifiOff className="w-3 h-3" />
+                  <span>Disconnected</span>
+                </>
+              )}
+            </div>
+            {signalRError && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {}}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                ⚠️ Error
+              </Button>
+            )}
+          </div>
+        </div>
+        {signalRError && (
+          <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+            SignalR Error: {signalRError}
+          </div>
+        )}
       </div>
 
       {/* Messages */}
@@ -163,6 +290,51 @@ export function ChatInterface() {
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {isStreaming && (
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <Bot className="w-4 h-4 text-blue-600" />
+              </div>
+            </div>
+            <div className="bg-gray-100 rounded-lg px-4 py-2 text-sm">
+              <div className="prose prose-sm max-w-none">
+                <ReactMarkdown 
+                  components={{
+                    code: ({ className, children, ...props }) => (
+                      <code
+                        className={cn(
+                          "bg-gray-200 px-1 py-0.5 rounded text-xs font-mono",
+                          className
+                        )}
+                        {...props}
+                      >
+                        {children}
+                      </code>
+                    ),
+                    pre: ({ className, children, ...props }) => (
+                      <pre
+                        className={cn(
+                          "bg-gray-800 text-gray-100 p-3 rounded-md overflow-x-auto text-xs",
+                          className
+                        )}
+                        {...props}
+                      >
+                        {children}
+                      </pre>
+                    )
+                  }}
+                >
+                  {streamingMessage}
+                </ReactMarkdown>
+                {streamingMessage && (
+                  <span className="animate-pulse ml-1 text-blue-600">▋</span>
+                )}
               </div>
             </div>
           </div>

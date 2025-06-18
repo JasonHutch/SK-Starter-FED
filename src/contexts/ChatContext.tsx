@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export interface Chat {
   id: string;
@@ -31,6 +30,16 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
 
+  // Auto-sync activeChat when chats change
+  useEffect(() => {
+    if (activeChat) {
+      const updatedActiveChat = chats.find(chat => chat.id === activeChat.id);
+      if (updatedActiveChat && updatedActiveChat !== activeChat) {
+        setActiveChat(updatedActiveChat);
+      }
+    }
+  }, [chats, activeChat]);
+
   const createChat = () => {
     const newChat: Chat = {
       id: `chat-${Date.now()}`,
@@ -61,22 +70,33 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const addMessage = (message: Omit<Message, 'id' | 'timestamp'>) => {
     if (!activeChat) return;
     
+    console.log('🔥 addMessage called:', { 
+      content: message.content.substring(0, 50) + '...', 
+      role: message.role,
+      chatId: activeChat.id 
+    });
+    
     const newMessage: Message = {
       ...message,
       id: `msg-${Date.now()}`,
       timestamp: new Date(),
     };
 
-    setChats(prev => prev.map(chat => 
-      chat.id === activeChat.id 
-        ? { ...chat, messages: [...chat.messages, newMessage] }
-        : chat
-    ));
-    
-    setActiveChat(prev => prev ? { 
-      ...prev, 
-      messages: [...prev.messages, newMessage] 
-    } : null);
+    // Add the new message to the active chat
+    setChats(prev => {
+      return prev.map(chat => {
+        const isActiveChat = chat.id === activeChat.id;
+        
+        if (isActiveChat) {
+          return {
+            ...chat,
+            messages: [...chat.messages, newMessage]
+          };
+        }
+        
+        return chat;
+      });
+    });
   };
 
   return (
