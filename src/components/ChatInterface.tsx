@@ -6,9 +6,11 @@ import { useChat } from "@/contexts/ChatContext";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from 'react-markdown';
 import { useSignalR } from '@/hooks/useSignalR';
+import { AgentSelector } from './AgentSelector';
+import { AgentMode, AgentModeLabels } from '@/types/agentMode';
 
 export function ChatInterface() {
-  const { activeChat, addMessage } = useChat();
+  const { activeChat, addMessage, switchAgent } = useChat();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState<string>('');
@@ -99,8 +101,8 @@ export function ChatInterface() {
 
     try {
       if (isConnected) {
-        // Send message via SignalR
-        await sendSignalRMessage(userMessage, activeChat.id);
+        // Send message via SignalR with the selected agent mode
+        await sendSignalRMessage(userMessage, activeChat.id, activeChat.selectedAgent);
       } else {
         // Fallback: Show connection error and simulate response
         console.warn('SignalR not connected, using fallback');
@@ -147,59 +149,34 @@ export function ChatInterface() {
 
   return (
     <div className="flex-1 flex flex-col bg-white">
-      {/* Chat Header */}
-      <div className="border-b border-gray-200 p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-semibold text-gray-900">{activeChat.name}</h1>
-            <p className="text-sm text-gray-500">
-              {activeChat.messages.length} messages
-            </p>
-          </div>
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+        <div className="flex items-center space-x-3">
+          <h2 className="text-lg font-semibold text-gray-800">{activeChat.name}</h2>
           <div className="flex items-center space-x-2">
-            {/* SignalR Connection Status */}
-            <div className={cn(
-              "flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium",
-              isConnected 
-                ? "bg-green-100 text-green-800" 
-                : isConnecting 
-                ? "bg-yellow-100 text-yellow-800"
-                : "bg-red-100 text-red-800"
-            )}>
-              {isConnected ? (
-                <>
-                  <Wifi className="w-3 h-3" />
-                  <span>Connected</span>
-                </>
-              ) : isConnecting ? (
-                <>
-                  <div className="w-3 h-3 border-2 border-yellow-600 border-t-transparent rounded-full animate-spin" />
-                  <span>Connecting</span>
-                </>
-              ) : (
-                <>
-                  <WifiOff className="w-3 h-3" />
-                  <span>Disconnected</span>
-                </>
-              )}
+            <AgentSelector
+              selectedAgent={activeChat.selectedAgent}
+              onAgentChange={switchAgent}
+              disabled={isLoading || isStreaming}
+            />
+            <div className="text-xs text-gray-500">
+              • {AgentModeLabels[activeChat.selectedAgent]}
             </div>
-            {signalRError && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {}}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                ⚠️ Error
-              </Button>
-            )}
           </div>
         </div>
-        {signalRError && (
-          <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-            SignalR Error: {signalRError}
-          </div>
-        )}
+        <div className="flex items-center space-x-2">
+          {isConnected ? (
+            <div className="flex items-center space-x-1 text-green-600">
+              <Wifi className="w-4 h-4" />
+              <span className="text-xs">Connected</span>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-1 text-red-600">
+              <WifiOff className="w-4 h-4" />
+              <span className="text-xs">Disconnected</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Messages */}

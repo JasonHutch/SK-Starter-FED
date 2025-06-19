@@ -1,4 +1,5 @@
 import * as signalR from '@microsoft/signalr';
+import { AgentMode } from '@/types/agentMode';
 
 export interface ChatMessage {
     content: string;
@@ -74,14 +75,14 @@ export class SignalRService {
         }
     }
 
-    async sendMessage(message: string, sessionId: string): Promise<void> {
+    async sendMessage(message: string, sessionId: string, agentMode: AgentMode = AgentMode.AzureOnly): Promise<void> {
         if (!this.connection || !this.isConnected) {
             throw new Error('SignalR connection is not established');
         }
 
         try {
-            // Use SendFinalResponse to send the message directly for testing
-            await this.connection.invoke('ProcessMessage', message, sessionId);
+            // Send message with agent mode to the hub
+            await this.connection.invoke('ProcessMessage', message, sessionId, agentMode);
         } catch (error) {
             console.error('SignalR: Failed to send message', error);
             throw error;

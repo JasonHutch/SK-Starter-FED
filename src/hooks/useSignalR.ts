@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { signalRService } from '@/services/signalRService';
 import * as signalR from '@microsoft/signalr';
+import { AgentMode } from '@/types/agentMode';
 
 export interface UseSignalROptions {
   autoConnect?: boolean;
@@ -84,9 +85,9 @@ export function useSignalR(options: UseSignalROptions = {}) {
     }
   }, []);
 
-  const sendMessage = useCallback(async (message: string, chatId: string) => {
+  const sendMessage = useCallback(async (message: string, chatId: string, agentMode: AgentMode = AgentMode.AzureOnly) => {
     try {
-      await signalRService.sendMessage(message, chatId);
+      await signalRService.sendMessage(message, chatId, agentMode);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send message');
       throw err;

@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { AgentMode } from '@/types/agentMode';
 
 export interface Chat {
   id: string;
   name: string;
   messages: Message[];
   createdAt: Date;
+  selectedAgent: AgentMode;
 }
 
 export interface Message {
@@ -22,6 +24,8 @@ interface ChatContextType {
   renameChat: (chatId: string, newName: string) => void;
   setActiveChat: (chat: Chat) => void;
   addMessage: (message: Omit<Message, 'id' | 'timestamp'>) => void;
+  switchAgent: (agentMode: AgentMode) => void;
+  clearChatMessages: () => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -46,6 +50,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       name: `Chat ${chats.length + 1}`,
       messages: [],
       createdAt: new Date(),
+      selectedAgent: AgentMode.AzureOnly,
     };
     setChats(prev => [newChat, ...prev]);
     setActiveChat(newChat);
@@ -99,6 +104,32 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const switchAgent = (agentMode: AgentMode) => {
+    if (!activeChat) return;
+    
+    // Clear messages when switching agents
+    setChats(prev => prev.map(chat => 
+      chat.id === activeChat.id 
+        ? { ...chat, selectedAgent: agentMode, messages: [] }
+        : chat
+    ));
+    
+    // Update active chat reference
+    setActiveChat(prev => prev ? { ...prev, selectedAgent: agentMode, messages: [] } : null);
+  };
+
+  const clearChatMessages = () => {
+    if (!activeChat) return;
+    
+    setChats(prev => prev.map(chat => 
+      chat.id === activeChat.id 
+        ? { ...chat, messages: [] }
+        : chat
+    ));
+    
+    setActiveChat(prev => prev ? { ...prev, messages: [] } : null);
+  };
+
   return (
     <ChatContext.Provider value={{
       chats,
@@ -108,6 +139,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       renameChat,
       setActiveChat,
       addMessage,
+      switchAgent,
+      clearChatMessages,
     }}>
       {children}
     </ChatContext.Provider>
