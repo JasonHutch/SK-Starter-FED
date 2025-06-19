@@ -1,13 +1,12 @@
-# Chat Garden Oasis 🌿💬
+# Semantic Kernel FED Starter
 
 A modern, real-time chat application built with React/TypeScript frontend and SignalR integration for seamless communication with AI agents. This project provides a complete chat interface with multiple AI agent modes, streaming responses, and tool call visualization.
 
 ## ✨ Features
 
 - **🤖 Multiple AI Agent Modes**
-  - Azure AI: Direct Azure AI assistance
-  - Tutor: Educational tutoring assistant
-  - Quiz: Interactive quiz generator
+  - Azure AI Agent: Direct Azure AI assistance
+  - Chat Completion Agent: Educational tutoring assistant
   - Smart Handoff: Intelligent agent switching
 
 - **⚡ Real-time Communication**
@@ -19,22 +18,6 @@ A modern, real-time chat application built with React/TypeScript frontend and Si
   - Built with shadcn/ui components
   - Tailwind CSS styling
   - Responsive design
-  - Dark/light mode support
-
-- **🔧 Developer Features**
-  - TypeScript for type safety
-  - Modular component architecture
-  - Context-based state management
-  - Extensible agent system
-
-## 🏗️ Architecture
-
-### Frontend (React/TypeScript)
-- **React 18** with TypeScript
-- **Vite** for fast development and building
-- **shadcn/ui** for beautiful, accessible components
-- **Tailwind CSS** for styling
-- **@microsoft/signalr** for real-time communication
 
 ### Backend Integration
 This frontend is designed to work with a C# SignalR ChatHub that should implement:
@@ -206,26 +189,6 @@ src/
 - `npm run lint` - Run ESLint
 - `npm run preview` - Preview production build
 
-### Adding New Agent Modes
-
-1. **Update the enum** in `src/types/agentMode.ts`:
-   ```typescript
-   export enum AgentMode {
-     // ... existing modes
-     NewMode = 'NewMode'
-   }
-   ```
-
-2. **Add labels and descriptions**:
-   ```typescript
-   export const AgentModeLabels: Record<AgentMode, string> = {
-     // ... existing labels
-     [AgentMode.NewMode]: 'New Agent'
-   };
-   ```
-
-3. **Update your C# backend** to handle the new mode
-
 ### Customizing UI
 
 The project uses shadcn/ui components which can be customized through:
@@ -241,10 +204,6 @@ The project uses shadcn/ui components which can be customized through:
 4. Push to the branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
 
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
 ## 🆘 Support
 
 If you encounter any issues or have questions:
@@ -254,13 +213,10 @@ If you encounter any issues or have questions:
 3. Include your environment details and error messages
 
 ## 🎯 Roadmap
-
-- [ ] WebSocket fallback for SignalR
+- [ ] Add more multi agent orchestration examples
+- [ ] Enable tool streaming
 - [ ] Message persistence
 - [ ] File upload support
-- [ ] Voice message integration
-- [ ] Multi-language support
-- [ ] Plugin system for custom agents
 
 ---
 
